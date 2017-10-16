@@ -1,25 +1,23 @@
-const express = require('express')
-const path = require('path')
+require("dotenv").config({ path: "./config.env" })
+const express = require("express")
+const path = require("path")
 const app = express()
-const axios = require('axios')
-const config = require('./frontend/config')
+const axios = require("axios")
 
-app.use(express.static('frontend/dist'))
+app.use(express.static("frontend/dist"))
 
-app.get('/', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'index.html'))
-})
-app.get('/auth', (req, res) => {
+app.get("/auth", (req, res) => {
   axios
-    .post(`https://github.com/login/oauth/access_token`, {
-      client_id: config.Client_ID,
-      client_secret: config.Client_Secret,
+    .post("https://github.com/login/oauth/access_token", {
+      client_id: process.env.Client_ID,
+      client_secret: process.env.Client_Secret,
       code: req.query.code
     })
-    .then(r => {
-      console.log('ACCESS TOKEN')
-      console.log(r.data)
-      res.end(r.data.split('=')[1].split('&')[0])
+    .then(ghResponse => {
+      const accessToken = new RegExp(/^access_token=(\w+)/).exec(
+        ghResponse.data
+      )[1]
+      res.end(accessToken)
     })
     .catch(e => {
       console.log(e.message)
@@ -27,4 +25,7 @@ app.get('/auth', (req, res) => {
     })
 })
 
-app.listen(8080)
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "index.html"))
+})
+app.listen(process.env.PORT, () => console.log(`listening ${process.env.PORT}`))
