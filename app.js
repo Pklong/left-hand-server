@@ -3,8 +3,10 @@ const express = require("express")
 const path = require("path")
 const app = express()
 const axios = require("axios")
+const morgan = require("morgan")
+app.use(morgan("tiny"))
 
-app.use(express.static("frontend/dist"))
+app.use(express.static(path.join("frontend", "dist")))
 
 app.get("/auth", (req, res) => {
   axios
@@ -28,4 +30,5 @@ app.get("/auth", (req, res) => {
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "index.html"))
 })
+
 app.listen(process.env.PORT, () => console.log(`listening ${process.env.PORT}`))
